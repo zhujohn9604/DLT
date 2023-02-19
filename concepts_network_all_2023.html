@@ -1,0 +1,429 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+                <link href="lib/tom-select/tom-select.css" rel="stylesheet">
+                <script src="lib/tom-select/tom-select.complete.min.js"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 1000px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 1000px;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+              <div id="filter-menu" class="card-header">
+                <div class="row no-gutters">
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'item')"
+                            id="select-item"
+                        >
+                        <option value="">Select a network item</option>
+                        <option value="edge">edge</option>
+                        <option value="node">node</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'property')"
+                            id="select-property"
+                        >
+                        <option value="">Select a property...</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            id="select-value"
+                        >
+                        <option value="">Select value(s)...</option>
+                    </select>
+                  </div>
+                  <div class="col-1 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="highlightFilter(filter);">Filter</button>
+                  </div>
+                  <div class="col-2 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="clearFilter(true)">Reset Selection</button>
+                  </div>
+                </div>
+              </div>
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+                  // explicitly using onItemAdd and this function as we need to save multiple values
+                  let updateValueFilter = function() {
+                      return function () {
+                      filter['value'].push(arguments[0])
+                      }
+                  }
+
+                  let valueControl = new TomSelect("#select-value",{
+                      maxItems: null,
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: updateValueFilter()
+                  });
+
+                  let addValues = function() {
+                      return function () {
+                          // clear the current value options and add the selected attribute values
+                          // tom-select handles duplicates
+                          let selectedProperty = arguments[0];
+                          valueControl.clear();
+                          valueControl.clearOptions();
+                          filter['value'] = []
+                          if (filter['item'] === 'node') {
+                              for (let each in allNodes) {
+                                  valueControl.addOption({
+                                      id:allNodes[each][selectedProperty],
+                                      title:allNodes[each][selectedProperty]
+                                  })
+                              }
+                          }
+                          else if (filter['item'] === 'edge') {
+                              for (let each in allEdges) {
+                                  valueControl.addOption({
+                                      id:allEdges[each][selectedProperty],
+                                      title:allEdges[each][selectedProperty]
+                                  })
+                              }
+                          }
+                      }
+                  };
+
+                  let propControl = new TomSelect("#select-property",{
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addValues()
+                  });
+
+                  let addProperties = function() {
+                      return function () {
+                          // loops through the selected network item and adds the attributes to dropdown
+                          // tom-select handles duplicates
+                          clearFilter(false)
+                          if (arguments[0] === 'edge') {
+                              for (let each in allEdges) {
+                                  if (allEdges.hasOwnProperty(each)) {
+                                      for (let eachProp in allEdges[each]) {
+                                          if (allEdges[each].hasOwnProperty(eachProp)) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                          else if (arguments[0] === 'node') {
+                              for (let each in allNodes) {
+                                  if (allNodes.hasOwnProperty(each)) {
+                                      for (let eachProp in allNodes[each]) {
+                                          if (allNodes[each].hasOwnProperty(eachProp)
+                                              && (eachProp !== 'hidden' && eachProp !== 'savedLabel'
+                                                  && eachProp !== 'hiddenLabel')) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  };
+
+                  let itemControl = new TomSelect("#select-item",{
+                      create: false,
+                      sortField:{
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addProperties()
+                  });
+
+                  function clearFilter(reset) {
+                      // utility function to clear all the selected filter options
+                      // if reset is set to true, the existing filter will be removed
+                      // else, only the dropdown options are cleared
+                      propControl.clear();
+                      propControl.clearOptions();
+                      valueControl.clear();
+                      valueControl.clearOptions();
+                      filter = {
+                          item : '',
+                          property : '',
+                          value : []
+                      }
+                      if (reset) {
+                          itemControl.clear();
+                          filterHighlight({nodes: []})
+                      }
+                  }
+
+                  function updateFilter(value, key) {
+                      // key could be 'item' or 'property' and value is as selected in dropdown
+                      filter[key] = value
+                  }
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 51, "id": "Logistics", "label": "Logistics", "shape": "dot", "size": 5.1000000000000005, "title": "Concept: \u0027Logistics\u0027, Frequency: 51"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 6715, "id": "Blockchain", "label": "Blockchain", "shape": "dot", "size": 671.5, "title": "Concept: \u0027Blockchain\u0027, Frequency: 6715"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 147, "id": "Real Estate", "label": "Real Estate", "shape": "dot", "size": 14.700000000000001, "title": "Concept: \u0027Real Estate\u0027, Frequency: 147"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 61, "id": "Real Estate Investment", "label": "Real Estate Investment", "shape": "dot", "size": 6.1000000000000005, "title": "Concept: \u0027Real Estate Investment\u0027, Frequency: 61"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 1914, "id": "FinTech", "label": "FinTech", "shape": "dot", "size": 191.4, "title": "Concept: \u0027FinTech\u0027, Frequency: 1914"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 4002, "id": "Cryptocurrency", "label": "Cryptocurrency", "shape": "dot", "size": 400.20000000000005, "title": "Concept: \u0027Cryptocurrency\u0027, Frequency: 4002"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 200, "id": "Banking", "label": "Banking", "shape": "dot", "size": 20.0, "title": "Concept: \u0027Banking\u0027, Frequency: 200"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 1106, "id": "Bitcoin", "label": "Bitcoin", "shape": "dot", "size": 110.60000000000001, "title": "Concept: \u0027Bitcoin\u0027, Frequency: 1106"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 451, "id": "Payments", "label": "Payments", "shape": "dot", "size": 45.1, "title": "Concept: \u0027Payments\u0027, Frequency: 451"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 680, "id": "Finance", "label": "Finance", "shape": "dot", "size": 68.0, "title": "Concept: \u0027Finance\u0027, Frequency: 680"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 1963, "id": "Financial Services", "label": "Financial Services", "shape": "dot", "size": 196.3, "title": "Concept: \u0027Financial Services\u0027, Frequency: 1963"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 249, "id": "E-Commerce", "label": "E-Commerce", "shape": "dot", "size": 24.900000000000002, "title": "Concept: \u0027E-Commerce\u0027, Frequency: 249"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 87, "id": "Crowdfunding", "label": "Crowdfunding", "shape": "dot", "size": 8.700000000000001, "title": "Concept: \u0027Crowdfunding\u0027, Frequency: 87"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 281, "id": "Ethereum", "label": "Ethereum", "shape": "dot", "size": 28.1, "title": "Concept: \u0027Ethereum\u0027, Frequency: 281"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 167, "id": "Asset Management", "label": "Asset Management", "shape": "dot", "size": 16.7, "title": "Concept: \u0027Asset Management\u0027, Frequency: 167"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 225, "id": "Financial Exchanges", "label": "Financial Exchanges", "shape": "dot", "size": 22.5, "title": "Concept: \u0027Financial Exchanges\u0027, Frequency: 225"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 54, "id": "Lending", "label": "Lending", "shape": "dot", "size": 5.4, "title": "Concept: \u0027Lending\u0027, Frequency: 54"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 96, "id": "Insurance", "label": "Insurance", "shape": "dot", "size": 9.600000000000001, "title": "Concept: \u0027Insurance\u0027, Frequency: 96"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 203, "id": "Venture Capital", "label": "Venture Capital", "shape": "dot", "size": 20.3, "title": "Concept: \u0027Venture Capital\u0027, Frequency: 203"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 329, "id": "Mobile Apps", "label": "Mobile Apps", "shape": "dot", "size": 32.9, "title": "Concept: \u0027Mobile Apps\u0027, Frequency: 329"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 435, "id": "Trading Platform", "label": "Trading Platform", "shape": "dot", "size": 43.5, "title": "Concept: \u0027Trading Platform\u0027, Frequency: 435"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 706, "id": "Internet", "label": "Internet", "shape": "dot", "size": 70.60000000000001, "title": "Concept: \u0027Internet\u0027, Frequency: 706"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 1796, "id": "Information Technology", "label": "Information Technology", "shape": "dot", "size": 179.60000000000002, "title": "Concept: \u0027Information Technology\u0027, Frequency: 1796"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 449, "id": "Consulting", "label": "Consulting", "shape": "dot", "size": 44.900000000000006, "title": "Concept: \u0027Consulting\u0027, Frequency: 449"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 478, "id": "Artificial Intelligence", "label": "Artificial Intelligence", "shape": "dot", "size": 47.800000000000004, "title": "Concept: \u0027Artificial Intelligence\u0027, Frequency: 478"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 182, "id": "Virtual Currency", "label": "Virtual Currency", "shape": "dot", "size": 18.2, "title": "Concept: \u0027Virtual Currency\u0027, Frequency: 182"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 1687, "id": "Software", "label": "Software", "shape": "dot", "size": 168.70000000000002, "title": "Concept: \u0027Software\u0027, Frequency: 1687"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 152, "id": "Mobile Payments", "label": "Mobile Payments", "shape": "dot", "size": 15.200000000000001, "title": "Concept: \u0027Mobile Payments\u0027, Frequency: 152"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 255, "id": "Apps", "label": "Apps", "shape": "dot", "size": 25.5, "title": "Concept: \u0027Apps\u0027, Frequency: 255"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 217, "id": "Marketplace", "label": "Marketplace", "shape": "dot", "size": 21.700000000000003, "title": "Concept: \u0027Marketplace\u0027, Frequency: 217"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 47, "id": "Service Industry", "label": "Service Industry", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Service Industry\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 60, "id": "Business Development", "label": "Business Development", "shape": "dot", "size": 6.0, "title": "Concept: \u0027Business Development\u0027, Frequency: 60"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 53, "id": "Training", "label": "Training", "shape": "dot", "size": 5.300000000000001, "title": "Concept: \u0027Training\u0027, Frequency: 53"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 46, "id": "Fashion", "label": "Fashion", "shape": "dot", "size": 4.6000000000000005, "title": "Concept: \u0027Fashion\u0027, Frequency: 46"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 180, "id": "Information Services", "label": "Information Services", "shape": "dot", "size": 18.0, "title": "Concept: \u0027Information Services\u0027, Frequency: 180"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 46, "id": "Compliance", "label": "Compliance", "shape": "dot", "size": 4.6000000000000005, "title": "Concept: \u0027Compliance\u0027, Frequency: 46"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 144, "id": "Media and Entertainment", "label": "Media and Entertainment", "shape": "dot", "size": 14.4, "title": "Concept: \u0027Media and Entertainment\u0027, Frequency: 144"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 79, "id": "Identity Management", "label": "Identity Management", "shape": "dot", "size": 7.9, "title": "Concept: \u0027Identity Management\u0027, Frequency: 79"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 114, "id": "Digital Marketing", "label": "Digital Marketing", "shape": "dot", "size": 11.4, "title": "Concept: \u0027Digital Marketing\u0027, Frequency: 114"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 52, "id": "iOS", "label": "iOS", "shape": "dot", "size": 5.2, "title": "Concept: \u0027iOS\u0027, Frequency: 52"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 36, "id": "PaaS", "label": "PaaS", "shape": "dot", "size": 3.6, "title": "Concept: \u0027PaaS\u0027, Frequency: 36"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 46, "id": "Predictive Analytics", "label": "Predictive Analytics", "shape": "dot", "size": 4.6000000000000005, "title": "Concept: \u0027Predictive Analytics\u0027, Frequency: 46"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 36, "id": "PC Games", "label": "PC Games", "shape": "dot", "size": 3.6, "title": "Concept: \u0027PC Games\u0027, Frequency: 36"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 48, "id": "Digital Entertainment", "label": "Digital Entertainment", "shape": "dot", "size": 4.800000000000001, "title": "Concept: \u0027Digital Entertainment\u0027, Frequency: 48"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 105, "id": "Web Apps", "label": "Web Apps", "shape": "dot", "size": 10.5, "title": "Concept: \u0027Web Apps\u0027, Frequency: 105"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 44, "id": "Cloud Infrastructure", "label": "Cloud Infrastructure", "shape": "dot", "size": 4.4, "title": "Concept: \u0027Cloud Infrastructure\u0027, Frequency: 44"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 141, "id": "Enterprise Software", "label": "Enterprise Software", "shape": "dot", "size": 14.100000000000001, "title": "Concept: \u0027Enterprise Software\u0027, Frequency: 141"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 223, "id": "Machine Learning", "label": "Machine Learning", "shape": "dot", "size": 22.3, "title": "Concept: \u0027Machine Learning\u0027, Frequency: 223"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 89, "id": "Art", "label": "Art", "shape": "dot", "size": 8.9, "title": "Concept: \u0027Art\u0027, Frequency: 89"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 339, "id": "Gaming", "label": "Gaming", "shape": "dot", "size": 33.9, "title": "Concept: \u0027Gaming\u0027, Frequency: 339"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 96, "id": "Digital Media", "label": "Digital Media", "shape": "dot", "size": 9.600000000000001, "title": "Concept: \u0027Digital Media\u0027, Frequency: 96"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 34, "id": "Data Integration", "label": "Data Integration", "shape": "dot", "size": 3.4000000000000004, "title": "Concept: \u0027Data Integration\u0027, Frequency: 34"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 52, "id": "EdTech", "label": "EdTech", "shape": "dot", "size": 5.2, "title": "Concept: \u0027EdTech\u0027, Frequency: 52"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 119, "id": "Mobile", "label": "Mobile", "shape": "dot", "size": 11.9, "title": "Concept: \u0027Mobile\u0027, Frequency: 119"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 265, "id": "Web Development", "label": "Web Development", "shape": "dot", "size": 26.5, "title": "Concept: \u0027Web Development\u0027, Frequency: 265"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 55, "id": "IT Infrastructure", "label": "IT Infrastructure", "shape": "dot", "size": 5.5, "title": "Concept: \u0027IT Infrastructure\u0027, Frequency: 55"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 231, "id": "Big Data", "label": "Big Data", "shape": "dot", "size": 23.1, "title": "Concept: \u0027Big Data\u0027, Frequency: 231"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 138, "id": "Social Media", "label": "Social Media", "shape": "dot", "size": 13.8, "title": "Concept: \u0027Social Media\u0027, Frequency: 138"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 58, "id": "Business Intelligence", "label": "Business Intelligence", "shape": "dot", "size": 5.800000000000001, "title": "Concept: \u0027Business Intelligence\u0027, Frequency: 58"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 96, "id": "Supply Chain Management", "label": "Supply Chain Management", "shape": "dot", "size": 9.600000000000001, "title": "Concept: \u0027Supply Chain Management\u0027, Frequency: 96"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 39, "id": "Management Consulting", "label": "Management Consulting", "shape": "dot", "size": 3.9000000000000004, "title": "Concept: \u0027Management Consulting\u0027, Frequency: 39"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 125, "id": "News", "label": "News", "shape": "dot", "size": 12.5, "title": "Concept: \u0027News\u0027, Frequency: 125"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 35, "id": "Fantasy Sports", "label": "Fantasy Sports", "shape": "dot", "size": 3.5, "title": "Concept: \u0027Fantasy Sports\u0027, Frequency: 35"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 49, "id": "Funding Platform", "label": "Funding Platform", "shape": "dot", "size": 4.9, "title": "Concept: \u0027Funding Platform\u0027, Frequency: 49"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 67, "id": "Developer Platform", "label": "Developer Platform", "shape": "dot", "size": 6.7, "title": "Concept: \u0027Developer Platform\u0027, Frequency: 67"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 38, "id": "Agriculture", "label": "Agriculture", "shape": "dot", "size": 3.8000000000000003, "title": "Concept: \u0027Agriculture\u0027, Frequency: 38"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 53, "id": "Infrastructure", "label": "Infrastructure", "shape": "dot", "size": 5.300000000000001, "title": "Concept: \u0027Infrastructure\u0027, Frequency: 53"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 157, "id": "Marketing", "label": "Marketing", "shape": "dot", "size": 15.700000000000001, "title": "Concept: \u0027Marketing\u0027, Frequency: 157"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 70, "id": "Software Engineering", "label": "Software Engineering", "shape": "dot", "size": 7.0, "title": "Concept: \u0027Software Engineering\u0027, Frequency: 70"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 64, "id": "Human Resources", "label": "Human Resources", "shape": "dot", "size": 6.4, "title": "Concept: \u0027Human Resources\u0027, Frequency: 64"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 68, "id": "Developer APIs", "label": "Developer APIs", "shape": "dot", "size": 6.800000000000001, "title": "Concept: \u0027Developer APIs\u0027, Frequency: 68"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 125, "id": "Education", "label": "Education", "shape": "dot", "size": 12.5, "title": "Concept: \u0027Education\u0027, Frequency: 125"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 87, "id": "Sports", "label": "Sports", "shape": "dot", "size": 8.700000000000001, "title": "Concept: \u0027Sports\u0027, Frequency: 87"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 152, "id": "Video Games", "label": "Video Games", "shape": "dot", "size": 15.200000000000001, "title": "Concept: \u0027Video Games\u0027, Frequency: 152"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 44, "id": "Retail Technology", "label": "Retail Technology", "shape": "dot", "size": 4.4, "title": "Concept: \u0027Retail Technology\u0027, Frequency: 44"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 65, "id": "eSports", "label": "eSports", "shape": "dot", "size": 6.5, "title": "Concept: \u0027eSports\u0027, Frequency: 65"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 77, "id": "Music", "label": "Music", "shape": "dot", "size": 7.7, "title": "Concept: \u0027Music\u0027, Frequency: 77"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 43, "id": "Travel", "label": "Travel", "shape": "dot", "size": 4.3, "title": "Concept: \u0027Travel\u0027, Frequency: 43"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 51, "id": "Market Research", "label": "Market Research", "shape": "dot", "size": 5.1000000000000005, "title": "Concept: \u0027Market Research\u0027, Frequency: 51"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 169, "id": "Analytics", "label": "Analytics", "shape": "dot", "size": 16.900000000000002, "title": "Concept: \u0027Analytics\u0027, Frequency: 169"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 42, "id": "Content", "label": "Content", "shape": "dot", "size": 4.2, "title": "Concept: \u0027Content\u0027, Frequency: 42"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 50, "id": "Renewable Energy", "label": "Renewable Energy", "shape": "dot", "size": 5.0, "title": "Concept: \u0027Renewable Energy\u0027, Frequency: 50"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 47, "id": "Content Creators", "label": "Content Creators", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Content Creators\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 82, "id": "Computer", "label": "Computer", "shape": "dot", "size": 8.200000000000001, "title": "Concept: \u0027Computer\u0027, Frequency: 82"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 98, "id": "Virtual Reality", "label": "Virtual Reality", "shape": "dot", "size": 9.8, "title": "Concept: \u0027Virtual Reality\u0027, Frequency: 98"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 57, "id": "E-Commerce Platforms", "label": "E-Commerce Platforms", "shape": "dot", "size": 5.7, "title": "Concept: \u0027E-Commerce Platforms\u0027, Frequency: 57"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 42, "id": "Recruiting", "label": "Recruiting", "shape": "dot", "size": 4.2, "title": "Concept: \u0027Recruiting\u0027, Frequency: 42"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 116, "id": "Health Care", "label": "Health Care", "shape": "dot", "size": 11.600000000000001, "title": "Concept: \u0027Health Care\u0027, Frequency: 116"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 140, "id": "Security", "label": "Security", "shape": "dot", "size": 14.0, "title": "Concept: \u0027Security\u0027, Frequency: 140"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 49, "id": "Retail", "label": "Retail", "shape": "dot", "size": 4.9, "title": "Concept: \u0027Retail\u0027, Frequency: 49"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 52, "id": "InsurTech", "label": "InsurTech", "shape": "dot", "size": 5.2, "title": "Concept: \u0027InsurTech\u0027, Frequency: 52"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 82, "id": "Communities", "label": "Communities", "shape": "dot", "size": 8.200000000000001, "title": "Concept: \u0027Communities\u0027, Frequency: 82"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 97, "id": "Online Games", "label": "Online Games", "shape": "dot", "size": 9.700000000000001, "title": "Concept: \u0027Online Games\u0027, Frequency: 97"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 32, "id": "Product Design", "label": "Product Design", "shape": "dot", "size": 3.2, "title": "Concept: \u0027Product Design\u0027, Frequency: 32"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 91, "id": "Augmented Reality", "label": "Augmented Reality", "shape": "dot", "size": 9.1, "title": "Concept: \u0027Augmented Reality\u0027, Frequency: 91"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 55, "id": "Energy", "label": "Energy", "shape": "dot", "size": 5.5, "title": "Concept: \u0027Energy\u0027, Frequency: 55"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 46, "id": "UX Design", "label": "UX Design", "shape": "dot", "size": 4.6000000000000005, "title": "Concept: \u0027UX Design\u0027, Frequency: 46"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 108, "id": "Cloud Computing", "label": "Cloud Computing", "shape": "dot", "size": 10.8, "title": "Concept: \u0027Cloud Computing\u0027, Frequency: 108"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 85, "id": "B2B", "label": "B2B", "shape": "dot", "size": 8.5, "title": "Concept: \u0027B2B\u0027, Frequency: 85"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 244, "id": "Cyber Security", "label": "Cyber Security", "shape": "dot", "size": 24.400000000000002, "title": "Concept: \u0027Cyber Security\u0027, Frequency: 244"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 294, "id": "Internet of Things", "label": "Internet of Things", "shape": "dot", "size": 29.400000000000002, "title": "Concept: \u0027Internet of Things\u0027, Frequency: 294"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 49, "id": "Developer Tools", "label": "Developer Tools", "shape": "dot", "size": 4.9, "title": "Concept: \u0027Developer Tools\u0027, Frequency: 49"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 92, "id": "Social Network", "label": "Social Network", "shape": "dot", "size": 9.200000000000001, "title": "Concept: \u0027Social Network\u0027, Frequency: 92"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 41, "id": "CRM", "label": "CRM", "shape": "dot", "size": 4.1000000000000005, "title": "Concept: \u0027CRM\u0027, Frequency: 41"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 45, "id": "Privacy", "label": "Privacy", "shape": "dot", "size": 4.5, "title": "Concept: \u0027Privacy\u0027, Frequency: 45"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 35, "id": "AgTech", "label": "AgTech", "shape": "dot", "size": 3.5, "title": "Concept: \u0027AgTech\u0027, Frequency: 35"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 47, "id": "Open Source", "label": "Open Source", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Open Source\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 59, "id": "Non Profit", "label": "Non Profit", "shape": "dot", "size": 5.9, "title": "Concept: \u0027Non Profit\u0027, Frequency: 59"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 50, "id": "Hardware", "label": "Hardware", "shape": "dot", "size": 5.0, "title": "Concept: \u0027Hardware\u0027, Frequency: 50"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 207, "id": "SaaS", "label": "SaaS", "shape": "dot", "size": 20.700000000000003, "title": "Concept: \u0027SaaS\u0027, Frequency: 207"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 61, "id": "Publishing", "label": "Publishing", "shape": "dot", "size": 6.1000000000000005, "title": "Concept: \u0027Publishing\u0027, Frequency: 61"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 90, "id": "Web Design", "label": "Web Design", "shape": "dot", "size": 9.0, "title": "Concept: \u0027Web Design\u0027, Frequency: 90"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 53, "id": "Cloud Data Services", "label": "Cloud Data Services", "shape": "dot", "size": 5.300000000000001, "title": "Concept: \u0027Cloud Data Services\u0027, Frequency: 53"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 50, "id": "Professional Services", "label": "Professional Services", "shape": "dot", "size": 5.0, "title": "Concept: \u0027Professional Services\u0027, Frequency: 50"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 106, "id": "Advertising", "label": "Advertising", "shape": "dot", "size": 10.600000000000001, "title": "Concept: \u0027Advertising\u0027, Frequency: 106"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 48, "id": "Sustainability", "label": "Sustainability", "shape": "dot", "size": 4.800000000000001, "title": "Concept: \u0027Sustainability\u0027, Frequency: 48"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 47, "id": "Network Security", "label": "Network Security", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Network Security\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 57, "id": "Stock Exchanges", "label": "Stock Exchanges", "shape": "dot", "size": 5.7, "title": "Concept: \u0027Stock Exchanges\u0027, Frequency: 57"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 42, "id": "Personal Finance", "label": "Personal Finance", "shape": "dot", "size": 4.2, "title": "Concept: \u0027Personal Finance\u0027, Frequency: 42"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 47, "id": "Transaction Processing", "label": "Transaction Processing", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Transaction Processing\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 44, "id": "Mining", "label": "Mining", "shape": "dot", "size": 4.4, "title": "Concept: \u0027Mining\u0027, Frequency: 44"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 40, "id": "Accounting", "label": "Accounting", "shape": "dot", "size": 4.0, "title": "Concept: \u0027Accounting\u0027, Frequency: 40"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 42, "id": "Hedge Funds", "label": "Hedge Funds", "shape": "dot", "size": 4.2, "title": "Concept: \u0027Hedge Funds\u0027, Frequency: 42"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 49, "id": "Online Portals", "label": "Online Portals", "shape": "dot", "size": 4.9, "title": "Concept: \u0027Online Portals\u0027, Frequency: 49"}]);
+                  edges = new vis.DataSet([{"from": "Logistics", "to": "Blockchain", "value": 420, "width": 42}, {"from": "Real Estate", "to": "Real Estate Investment", "value": 370, "width": 37}, {"from": "Real Estate", "to": "Blockchain", "value": 1240, "width": 124}, {"from": "Real Estate", "to": "FinTech", "value": 380, "width": 38}, {"from": "Real Estate", "to": "Cryptocurrency", "value": 480, "width": 48}, {"from": "Banking", "to": "Bitcoin", "value": 330, "width": 33}, {"from": "Banking", "to": "Cryptocurrency", "value": 1220, "width": 122}, {"from": "Banking", "to": "Payments", "value": 450, "width": 45}, {"from": "Banking", "to": "Finance", "value": 330, "width": 33}, {"from": "Banking", "to": "FinTech", "value": 1240, "width": 124}, {"from": "Banking", "to": "Financial Services", "value": 1300, "width": 130}, {"from": "Banking", "to": "Blockchain", "value": 1120, "width": 112}, {"from": "Financial Services", "to": "E-Commerce", "value": 360, "width": 36}, {"from": "Financial Services", "to": "Crowdfunding", "value": 320, "width": 32}, {"from": "Financial Services", "to": "Ethereum", "value": 520, "width": 52}, {"from": "Financial Services", "to": "Asset Management", "value": 800, "width": 80}, {"from": "Financial Services", "to": "Finance", "value": 3220, "width": 322}, {"from": "Financial Services", "to": "Financial Exchanges", "value": 1180, "width": 118}, {"from": "Financial Services", "to": "Lending", "value": 330, "width": 33}, {"from": "Financial Services", "to": "FinTech", "value": 9470, "width": 947}, {"from": "Financial Services", "to": "Insurance", "value": 350, "width": 35}, {"from": "Financial Services", "to": "Venture Capital", "value": 920, "width": 92}, {"from": "Financial Services", "to": "Mobile Apps", "value": 330, "width": 33}, {"from": "Financial Services", "to": "Bitcoin", "value": 3620, "width": 362}, {"from": "Financial Services", "to": "Payments", "value": 1860, "width": 186}, {"from": "Financial Services", "to": "Trading Platform", "value": 2030, "width": 203}, {"from": "Financial Services", "to": "Cryptocurrency", "value": 12380, "width": 1238}, {"from": "Financial Services", "to": "Internet", "value": 1020, "width": 102}, {"from": "Financial Services", "to": "Information Technology", "value": 2680, "width": 268}, {"from": "Financial Services", "to": "Consulting", "value": 770, "width": 77}, {"from": "Financial Services", "to": "Artificial Intelligence", "value": 390, "width": 39}, {"from": "Financial Services", "to": "Virtual Currency", "value": 470, "width": 47}, {"from": "Financial Services", "to": "Software", "value": 1640, "width": 164}, {"from": "Financial Services", "to": "Mobile Payments", "value": 630, "width": 63}, {"from": "Financial Services", "to": "Blockchain", "value": 11420, "width": 1142}, {"from": "Financial Services", "to": "Apps", "value": 300, "width": 30}, {"from": "E-Commerce", "to": "Payments", "value": 400, "width": 40}, {"from": "E-Commerce", "to": "Information Technology", "value": 390, "width": 39}, {"from": "E-Commerce", "to": "Internet", "value": 400, "width": 40}, {"from": "E-Commerce", "to": "Cryptocurrency", "value": 1060, "width": 106}, {"from": "E-Commerce", "to": "FinTech", "value": 540, "width": 54}, {"from": "E-Commerce", "to": "Bitcoin", "value": 510, "width": 51}, {"from": "E-Commerce", "to": "Blockchain", "value": 1630, "width": 163}, {"from": "E-Commerce", "to": "Marketplace", "value": 390, "width": 39}, {"from": "E-Commerce", "to": "Software", "value": 390, "width": 39}, {"from": "Service Industry", "to": "Blockchain", "value": 360, "width": 36}, {"from": "Business Development", "to": "Blockchain", "value": 490, "width": 49}, {"from": "Payments", "to": "Blockchain", "value": 2410, "width": 241}, {"from": "Payments", "to": "Finance", "value": 500, "width": 50}, {"from": "Payments", "to": "Bitcoin", "value": 1210, "width": 121}, {"from": "Payments", "to": "FinTech", "value": 2070, "width": 207}, {"from": "Payments", "to": "Software", "value": 470, "width": 47}, {"from": "Payments", "to": "Mobile Payments", "value": 700, "width": 70}, {"from": "Payments", "to": "Internet", "value": 380, "width": 38}, {"from": "Payments", "to": "Cryptocurrency", "value": 2540, "width": 254}, {"from": "Payments", "to": "Information Technology", "value": 760, "width": 76}, {"from": "Training", "to": "Blockchain", "value": 410, "width": 41}, {"from": "Lending", "to": "Cryptocurrency", "value": 330, "width": 33}, {"from": "Lending", "to": "FinTech", "value": 350, "width": 35}, {"from": "Lending", "to": "Blockchain", "value": 360, "width": 36}, {"from": "Fashion", "to": "Blockchain", "value": 400, "width": 40}, {"from": "Information Services", "to": "Information Technology", "value": 1050, "width": 105}, {"from": "Information Services", "to": "Cryptocurrency", "value": 670, "width": 67}, {"from": "Information Services", "to": "Software", "value": 370, "width": 37}, {"from": "Information Services", "to": "Blockchain", "value": 1340, "width": 134}, {"from": "Blockchain", "to": "Compliance", "value": 380, "width": 38}, {"from": "Blockchain", "to": "Media and Entertainment", "value": 1210, "width": 121}, {"from": "Blockchain", "to": "Asset Management", "value": 1070, "width": 107}, {"from": "Blockchain", "to": "Identity Management", "value": 710, "width": 71}, {"from": "Blockchain", "to": "Digital Marketing", "value": 970, "width": 97}, {"from": "Blockchain", "to": "iOS", "value": 510, "width": 51}, {"from": "Blockchain", "to": "PaaS", "value": 330, "width": 33}, {"from": "Blockchain", "to": "Predictive Analytics", "value": 390, "width": 39}, {"from": "Blockchain", "to": "PC Games", "value": 330, "width": 33}, {"from": "Blockchain", "to": "Digital Entertainment", "value": 400, "width": 40}, {"from": "Blockchain", "to": "Web Apps", "value": 970, "width": 97}, {"from": "Blockchain", "to": "Marketplace", "value": 1790, "width": 179}, {"from": "Blockchain", "to": "Bitcoin", "value": 4350, "width": 435}, {"from": "Blockchain", "to": "Cloud Infrastructure", "value": 380, "width": 38}, {"from": "Blockchain", "to": "Enterprise Software", "value": 1280, "width": 128}, {"from": "Blockchain", "to": "Machine Learning", "value": 1980, "width": 198}, {"from": "Blockchain", "to": "Art", "value": 720, "width": 72}, {"from": "Blockchain", "to": "Gaming", "value": 2980, "width": 298}, {"from": "Blockchain", "to": "Digital Media", "value": 800, "width": 80}, {"from": "Blockchain", "to": "Data Integration", "value": 330, "width": 33}, {"from": "Blockchain", "to": "EdTech", "value": 480, "width": 48}, {"from": "Blockchain", "to": "Mobile Payments", "value": 860, "width": 86}, {"from": "Blockchain", "to": "Mobile", "value": 910, "width": 91}, {"from": "Blockchain", "to": "Web Development", "value": 2490, "width": 249}, {"from": "Blockchain", "to": "FinTech", "value": 13040, "width": 1304}, {"from": "Blockchain", "to": "IT Infrastructure", "value": 440, "width": 44}, {"from": "Blockchain", "to": "Big Data", "value": 2030, "width": 203}, {"from": "Blockchain", "to": "Social Media", "value": 1050, "width": 105}, {"from": "Blockchain", "to": "Business Intelligence", "value": 520, "width": 52}, {"from": "Blockchain", "to": "Cryptocurrency", "value": 21820, "width": 2182}, {"from": "Blockchain", "to": "Supply Chain Management", "value": 940, "width": 94}, {"from": "Blockchain", "to": "Trading Platform", "value": 1920, "width": 192}, {"from": "Blockchain", "to": "Apps", "value": 1930, "width": 193}, {"from": "Blockchain", "to": "Virtual Currency", "value": 1170, "width": 117}, {"from": "Blockchain", "to": "Management Consulting", "value": 340, "width": 34}, {"from": "Blockchain", "to": "News", "value": 820, "width": 82}, {"from": "Blockchain", "to": "Fantasy Sports", "value": 320, "width": 32}, {"from": "Blockchain", "to": "Funding Platform", "value": 390, "width": 39}, {"from": "Blockchain", "to": "Developer Platform", "value": 630, "width": 63}, {"from": "Blockchain", "to": "Agriculture", "value": 360, "width": 36}, {"from": "Blockchain", "to": "Infrastructure", "value": 470, "width": 47}, {"from": "Blockchain", "to": "Marketing", "value": 1370, "width": 137}, {"from": "Blockchain", "to": "Software Engineering", "value": 650, "width": 65}, {"from": "Blockchain", "to": "Human Resources", "value": 610, "width": 61}, {"from": "Blockchain", "to": "Developer APIs", "value": 580, "width": 58}, {"from": "Blockchain", "to": "Education", "value": 1010, "width": 101}, {"from": "Blockchain", "to": "Artificial Intelligence", "value": 4290, "width": 429}, {"from": "Blockchain", "to": "Financial Exchanges", "value": 1120, "width": 112}, {"from": "Blockchain", "to": "Sports", "value": 780, "width": 78}, {"from": "Blockchain", "to": "Video Games", "value": 1380, "width": 138}, {"from": "Blockchain", "to": "Finance", "value": 3990, "width": 399}, {"from": "Blockchain", "to": "Retail Technology", "value": 360, "width": 36}, {"from": "Blockchain", "to": "eSports", "value": 580, "width": 58}, {"from": "Blockchain", "to": "Music", "value": 690, "width": 69}, {"from": "Blockchain", "to": "Travel", "value": 390, "width": 39}, {"from": "Blockchain", "to": "Insurance", "value": 760, "width": 76}, {"from": "Blockchain", "to": "Market Research", "value": 370, "width": 37}, {"from": "Blockchain", "to": "Analytics", "value": 1370, "width": 137}, {"from": "Blockchain", "to": "Content", "value": 310, "width": 31}, {"from": "Blockchain", "to": "Renewable Energy", "value": 390, "width": 39}, {"from": "Blockchain", "to": "Content Creators", "value": 380, "width": 38}, {"from": "Blockchain", "to": "Computer", "value": 680, "width": 68}, {"from": "Blockchain", "to": "Information Technology", "value": 15490, "width": 1549}, {"from": "Blockchain", "to": "Virtual Reality", "value": 880, "width": 88}, {"from": "Blockchain", "to": "E-Commerce Platforms", "value": 480, "width": 48}, {"from": "Blockchain", "to": "Recruiting", "value": 390, "width": 39}, {"from": "Blockchain", "to": "Health Care", "value": 1070, "width": 107}, {"from": "Blockchain", "to": "Consulting", "value": 3790, "width": 379}, {"from": "Blockchain", "to": "Security", "value": 1100, "width": 110}, {"from": "Blockchain", "to": "Retail", "value": 350, "width": 35}, {"from": "Blockchain", "to": "Ethereum", "value": 2250, "width": 225}, {"from": "Blockchain", "to": "InsurTech", "value": 480, "width": 48}, {"from": "Blockchain", "to": "Communities", "value": 590, "width": 59}, {"from": "Blockchain", "to": "Online Games", "value": 890, "width": 89}, {"from": "Blockchain", "to": "Product Design", "value": 300, "width": 30}, {"from": "Blockchain", "to": "Augmented Reality", "value": 860, "width": 86}, {"from": "Blockchain", "to": "Energy", "value": 410, "width": 41}, {"from": "Blockchain", "to": "UX Design", "value": 450, "width": 45}, {"from": "Blockchain", "to": "Cloud Computing", "value": 1030, "width": 103}, {"from": "Blockchain", "to": "B2B", "value": 710, "width": 71}, {"from": "Blockchain", "to": "Cyber Security", "value": 2180, "width": 218}, {"from": "Blockchain", "to": "Internet of Things", "value": 2810, "width": 281}, {"from": "Blockchain", "to": "Developer Tools", "value": 430, "width": 43}, {"from": "Blockchain", "to": "Social Network", "value": 720, "width": 72}, {"from": "Blockchain", "to": "CRM", "value": 340, "width": 34}, {"from": "Blockchain", "to": "Mobile Apps", "value": 2650, "width": 265}, {"from": "Blockchain", "to": "Privacy", "value": 420, "width": 42}, {"from": "Blockchain", "to": "AgTech", "value": 340, "width": 34}, {"from": "Blockchain", "to": "Venture Capital", "value": 1600, "width": 160}, {"from": "Blockchain", "to": "Open Source", "value": 400, "width": 40}, {"from": "Blockchain", "to": "Non Profit", "value": 500, "width": 50}, {"from": "Blockchain", "to": "Real Estate Investment", "value": 530, "width": 53}, {"from": "Blockchain", "to": "Internet", "value": 5660, "width": 566}, {"from": "Blockchain", "to": "Hardware", "value": 350, "width": 35}, {"from": "Blockchain", "to": "Crowdfunding", "value": 640, "width": 64}, {"from": "Blockchain", "to": "SaaS", "value": 1800, "width": 180}, {"from": "Blockchain", "to": "Publishing", "value": 440, "width": 44}, {"from": "Blockchain", "to": "Web Design", "value": 840, "width": 84}, {"from": "Blockchain", "to": "Cloud Data Services", "value": 450, "width": 45}, {"from": "Blockchain", "to": "Professional Services", "value": 430, "width": 43}, {"from": "Blockchain", "to": "Advertising", "value": 870, "width": 87}, {"from": "Blockchain", "to": "Software", "value": 14550, "width": 1455}, {"from": "Blockchain", "to": "Sustainability", "value": 460, "width": 46}, {"from": "Blockchain", "to": "Network Security", "value": 460, "width": 46}, {"from": "Software Engineering", "to": "Software", "value": 390, "width": 39}, {"from": "Stock Exchanges", "to": "Cryptocurrency", "value": 470, "width": 47}, {"from": "Ethereum", "to": "Cryptocurrency", "value": 1770, "width": 177}, {"from": "Ethereum", "to": "Software", "value": 630, "width": 63}, {"from": "Ethereum", "to": "Bitcoin", "value": 1040, "width": 104}, {"from": "Ethereum", "to": "FinTech", "value": 790, "width": 79}, {"from": "Ethereum", "to": "Information Technology", "value": 460, "width": 46}, {"from": "FinTech", "to": "Trading Platform", "value": 1780, "width": 178}, {"from": "FinTech", "to": "Asset Management", "value": 620, "width": 62}, {"from": "FinTech", "to": "Marketplace", "value": 440, "width": 44}, {"from": "FinTech", "to": "Machine Learning", "value": 350, "width": 35}, {"from": "FinTech", "to": "Apps", "value": 430, "width": 43}, {"from": "FinTech", "to": "Software", "value": 2520, "width": 252}, {"from": "FinTech", "to": "Crowdfunding", "value": 400, "width": 40}, {"from": "FinTech", "to": "Venture Capital", "value": 560, "width": 56}, {"from": "FinTech", "to": "Cyber Security", "value": 300, "width": 30}, {"from": "FinTech", "to": "Financial Exchanges", "value": 1110, "width": 111}, {"from": "FinTech", "to": "Finance", "value": 2860, "width": 286}, {"from": "FinTech", "to": "Artificial Intelligence", "value": 850, "width": 85}, {"from": "FinTech", "to": "Insurance", "value": 320, "width": 32}, {"from": "FinTech", "to": "Enterprise Software", "value": 310, "width": 31}, {"from": "FinTech", "to": "Mobile Apps", "value": 470, "width": 47}, {"from": "FinTech", "to": "SaaS", "value": 430, "width": 43}, {"from": "FinTech", "to": "Big Data", "value": 310, "width": 31}, {"from": "FinTech", "to": "Bitcoin", "value": 3520, "width": 352}, {"from": "FinTech", "to": "Cryptocurrency", "value": 11430, "width": 1143}, {"from": "FinTech", "to": "Personal Finance", "value": 320, "width": 32}, {"from": "FinTech", "to": "Virtual Currency", "value": 540, "width": 54}, {"from": "FinTech", "to": "Consulting", "value": 510, "width": 51}, {"from": "FinTech", "to": "Mobile Payments", "value": 850, "width": 85}, {"from": "FinTech", "to": "Information Technology", "value": 2800, "width": 280}, {"from": "FinTech", "to": "Internet", "value": 1280, "width": 128}, {"from": "Web Design", "to": "Web Development", "value": 600, "width": 60}, {"from": "Web Design", "to": "Information Technology", "value": 300, "width": 30}, {"from": "Web Design", "to": "Software", "value": 510, "width": 51}, {"from": "Bitcoin", "to": "Mobile Payments", "value": 330, "width": 33}, {"from": "Bitcoin", "to": "News", "value": 380, "width": 38}, {"from": "Bitcoin", "to": "Information Technology", "value": 1250, "width": 125}, {"from": "Bitcoin", "to": "Financial Exchanges", "value": 680, "width": 68}, {"from": "Bitcoin", "to": "Finance", "value": 1370, "width": 137}, {"from": "Bitcoin", "to": "Trading Platform", "value": 800, "width": 80}, {"from": "Bitcoin", "to": "Virtual Currency", "value": 660, "width": 66}, {"from": "Bitcoin", "to": "Software", "value": 850, "width": 85}, {"from": "Bitcoin", "to": "Cryptocurrency", "value": 6290, "width": 629}, {"from": "Bitcoin", "to": "Internet", "value": 780, "width": 78}, {"from": "Bitcoin", "to": "Consulting", "value": 310, "width": 31}, {"from": "Mobile", "to": "Cryptocurrency", "value": 510, "width": 51}, {"from": "Mobile", "to": "Software", "value": 380, "width": 38}, {"from": "eSports", "to": "Gaming", "value": 420, "width": 42}, {"from": "Cyber Security", "to": "Information Technology", "value": 880, "width": 88}, {"from": "Cyber Security", "to": "Cryptocurrency", "value": 710, "width": 71}, {"from": "Cyber Security", "to": "Software", "value": 750, "width": 75}, {"from": "Art", "to": "Cryptocurrency", "value": 340, "width": 34}, {"from": "Social Network", "to": "Cryptocurrency", "value": 460, "width": 46}, {"from": "Transaction Processing", "to": "Cryptocurrency", "value": 320, "width": 32}, {"from": "Finance", "to": "Venture Capital", "value": 370, "width": 37}, {"from": "Finance", "to": "Software", "value": 710, "width": 71}, {"from": "Finance", "to": "Internet", "value": 410, "width": 41}, {"from": "Finance", "to": "Trading Platform", "value": 550, "width": 55}, {"from": "Finance", "to": "Information Technology", "value": 810, "width": 81}, {"from": "Finance", "to": "Consulting", "value": 320, "width": 32}, {"from": "Finance", "to": "Cryptocurrency", "value": 4090, "width": 409}, {"from": "Finance", "to": "Financial Exchanges", "value": 400, "width": 40}, {"from": "Insurance", "to": "Cryptocurrency", "value": 320, "width": 32}, {"from": "Machine Learning", "to": "Information Technology", "value": 780, "width": 78}, {"from": "Machine Learning", "to": "Artificial Intelligence", "value": 1830, "width": 183}, {"from": "Machine Learning", "to": "Software", "value": 860, "width": 86}, {"from": "Machine Learning", "to": "Internet of Things", "value": 320, "width": 32}, {"from": "Machine Learning", "to": "Cryptocurrency", "value": 460, "width": 46}, {"from": "Mining", "to": "Cryptocurrency", "value": 310, "width": 31}, {"from": "Supply Chain Management", "to": "Software", "value": 320, "width": 32}, {"from": "Education", "to": "Cryptocurrency", "value": 470, "width": 47}, {"from": "Accounting", "to": "Cryptocurrency", "value": 330, "width": 33}, {"from": "Big Data", "to": "Software", "value": 670, "width": 67}, {"from": "Big Data", "to": "Artificial Intelligence", "value": 650, "width": 65}, {"from": "Big Data", "to": "Internet of Things", "value": 330, "width": 33}, {"from": "Big Data", "to": "Cryptocurrency", "value": 490, "width": 49}, {"from": "Big Data", "to": "Information Technology", "value": 600, "width": 60}, {"from": "Big Data", "to": "Analytics", "value": 420, "width": 42}, {"from": "Video Games", "to": "Online Games", "value": 500, "width": 50}, {"from": "Video Games", "to": "Gaming", "value": 830, "width": 83}, {"from": "Video Games", "to": "Cryptocurrency", "value": 490, "width": 49}, {"from": "Hedge Funds", "to": "Cryptocurrency", "value": 350, "width": 35}, {"from": "Developer Platform", "to": "Software", "value": 300, "width": 30}, {"from": "Online Portals", "to": "Cryptocurrency", "value": 310, "width": 31}, {"from": "Virtual Reality", "to": "Software", "value": 340, "width": 34}, {"from": "Virtual Reality", "to": "Augmented Reality", "value": 460, "width": 46}, {"from": "Virtual Reality", "to": "Cryptocurrency", "value": 310, "width": 31}, {"from": "Crowdfunding", "to": "Cryptocurrency", "value": 350, "width": 35}, {"from": "Mobile Apps", "to": "Web Apps", "value": 320, "width": 32}, {"from": "Mobile Apps", "to": "Cryptocurrency", "value": 1110, "width": 111}, {"from": "Mobile Apps", "to": "Web Development", "value": 910, "width": 91}, {"from": "Mobile Apps", "to": "Apps", "value": 330, "width": 33}, {"from": "Mobile Apps", "to": "Information Technology", "value": 980, "width": 98}, {"from": "Mobile Apps", "to": "Software", "value": 1300, "width": 130}, {"from": "Mobile Apps", "to": "Artificial Intelligence", "value": 320, "width": 32}, {"from": "Financial Exchanges", "to": "Cryptocurrency", "value": 1690, "width": 169}, {"from": "Financial Exchanges", "to": "Trading Platform", "value": 450, "width": 45}, {"from": "Internet", "to": "Internet of Things", "value": 300, "width": 30}, {"from": "Internet", "to": "Cryptocurrency", "value": 2760, "width": 276}, {"from": "Internet", "to": "Software", "value": 1590, "width": 159}, {"from": "Internet", "to": "Consulting", "value": 350, "width": 35}, {"from": "Internet", "to": "Apps", "value": 320, "width": 32}, {"from": "Internet", "to": "Gaming", "value": 320, "width": 32}, {"from": "Internet", "to": "Information Technology", "value": 2210, "width": 221}, {"from": "Sports", "to": "Gaming", "value": 330, "width": 33}, {"from": "Mobile Payments", "to": "Cryptocurrency", "value": 910, "width": 91}, {"from": "Software", "to": "Apps", "value": 880, "width": 88}, {"from": "Software", "to": "Security", "value": 300, "width": 30}, {"from": "Software", "to": "Artificial Intelligence", "value": 1630, "width": 163}, {"from": "Software", "to": "Web Apps", "value": 460, "width": 46}, {"from": "Software", "to": "Cloud Computing", "value": 420, "width": 42}, {"from": "Software", "to": "Information Technology", "value": 6000, "width": 600}, {"from": "Software", "to": "Enterprise Software", "value": 610, "width": 61}, {"from": "Software", "to": "Consulting", "value": 1090, "width": 109}, {"from": "Software", "to": "Gaming", "value": 520, "width": 52}, {"from": "Software", "to": "Internet of Things", "value": 970, "width": 97}, {"from": "Software", "to": "Augmented Reality", "value": 370, "width": 37}, {"from": "Software", "to": "Cryptocurrency", "value": 5060, "width": 506}, {"from": "Software", "to": "Identity Management", "value": 330, "width": 33}, {"from": "Software", "to": "Analytics", "value": 560, "width": 56}, {"from": "Software", "to": "Computer", "value": 410, "width": 41}, {"from": "Software", "to": "Web Development", "value": 1600, "width": 160}, {"from": "Software", "to": "SaaS", "value": 1030, "width": 103}, {"from": "Advertising", "to": "Cryptocurrency", "value": 350, "width": 35}, {"from": "Advertising", "to": "Marketing", "value": 330, "width": 33}, {"from": "Information Technology", "to": "Trading Platform", "value": 350, "width": 35}, {"from": "Information Technology", "to": "SaaS", "value": 550, "width": 55}, {"from": "Information Technology", "to": "Venture Capital", "value": 320, "width": 32}, {"from": "Information Technology", "to": "Internet of Things", "value": 840, "width": 84}, {"from": "Information Technology", "to": "Marketplace", "value": 340, "width": 34}, {"from": "Information Technology", "to": "Cloud Computing", "value": 390, "width": 39}, {"from": "Information Technology", "to": "Security", "value": 430, "width": 43}, {"from": "Information Technology", "to": "Web Development", "value": 1130, "width": 113}, {"from": "Information Technology", "to": "Artificial Intelligence", "value": 1470, "width": 147}, {"from": "Information Technology", "to": "Cryptocurrency", "value": 5550, "width": 555}, {"from": "Information Technology", "to": "Analytics", "value": 450, "width": 45}, {"from": "Information Technology", "to": "Gaming", "value": 340, "width": 34}, {"from": "Information Technology", "to": "Health Care", "value": 360, "width": 36}, {"from": "Information Technology", "to": "Enterprise Software", "value": 430, "width": 43}, {"from": "Information Technology", "to": "Consulting", "value": 1470, "width": 147}, {"from": "Information Technology", "to": "Marketing", "value": 320, "width": 32}, {"from": "Information Technology", "to": "Apps", "value": 570, "width": 57}, {"from": "Analytics", "to": "Artificial Intelligence", "value": 360, "width": 36}, {"from": "Analytics", "to": "Cryptocurrency", "value": 560, "width": 56}, {"from": "Digital Marketing", "to": "Cryptocurrency", "value": 370, "width": 37}, {"from": "Artificial Intelligence", "to": "Web Development", "value": 310, "width": 31}, {"from": "Artificial Intelligence", "to": "Cryptocurrency", "value": 990, "width": 99}, {"from": "Artificial Intelligence", "to": "Consulting", "value": 330, "width": 33}, {"from": "Artificial Intelligence", "to": "Internet of Things", "value": 680, "width": 68}, {"from": "Consulting", "to": "Web Development", "value": 400, "width": 40}, {"from": "Consulting", "to": "Cryptocurrency", "value": 1390, "width": 139}, {"from": "PC Games", "to": "Gaming", "value": 300, "width": 30}, {"from": "Social Media", "to": "Cryptocurrency", "value": 700, "width": 70}, {"from": "News", "to": "Cryptocurrency", "value": 760, "width": 76}, {"from": "Cryptocurrency", "to": "Online Games", "value": 370, "width": 37}, {"from": "Cryptocurrency", "to": "Security", "value": 470, "width": 47}, {"from": "Cryptocurrency", "to": "Web Development", "value": 560, "width": 56}, {"from": "Cryptocurrency", "to": "Marketing", "value": 590, "width": 59}, {"from": "Cryptocurrency", "to": "Digital Media", "value": 460, "width": 46}, {"from": "Cryptocurrency", "to": "Apps", "value": 950, "width": 95}, {"from": "Cryptocurrency", "to": "Publishing", "value": 340, "width": 34}, {"from": "Cryptocurrency", "to": "SaaS", "value": 420, "width": 42}, {"from": "Cryptocurrency", "to": "Communities", "value": 340, "width": 34}, {"from": "Cryptocurrency", "to": "Venture Capital", "value": 980, "width": 98}, {"from": "Cryptocurrency", "to": "Media and Entertainment", "value": 540, "width": 54}, {"from": "Cryptocurrency", "to": "Trading Platform", "value": 3530, "width": 353}, {"from": "Cryptocurrency", "to": "Asset Management", "value": 1120, "width": 112}, {"from": "Cryptocurrency", "to": "Gaming", "value": 1130, "width": 113}, {"from": "Cryptocurrency", "to": "Internet of Things", "value": 500, "width": 50}, {"from": "Cryptocurrency", "to": "Virtual Currency", "value": 1290, "width": 129}, {"from": "Cryptocurrency", "to": "Marketplace", "value": 920, "width": 92}, {"from": "Online Games", "to": "Gaming", "value": 560, "width": 56}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.3,
+            "damping": 0.09,
+            "gravitationalConstant": -80000,
+            "springConstant": 0.001,
+            "springLength": 250
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

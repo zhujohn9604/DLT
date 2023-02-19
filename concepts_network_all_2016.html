@@ -1,0 +1,334 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+                <link href="lib/tom-select/tom-select.css" rel="stylesheet">
+                <script src="lib/tom-select/tom-select.complete.min.js"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 1000px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+              <div id="filter-menu" class="card-header">
+                <div class="row no-gutters">
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'item')"
+                            id="select-item"
+                        >
+                        <option value="">Select a network item</option>
+                        <option value="edge">edge</option>
+                        <option value="node">node</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="updateFilter(value, 'property')"
+                            id="select-property"
+                        >
+                        <option value="">Select a property...</option>
+                    </select>
+                  </div>
+                  <div class="col-3 pb-2">
+                    <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            id="select-value"
+                        >
+                        <option value="">Select value(s)...</option>
+                    </select>
+                  </div>
+                  <div class="col-1 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="highlightFilter(filter);">Filter</button>
+                  </div>
+                  <div class="col-2 pb-2">
+                    <button type="button" class="btn btn-primary btn-block" onclick="clearFilter(true)">Reset Selection</button>
+                  </div>
+                </div>
+              </div>
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+                  // explicitly using onItemAdd and this function as we need to save multiple values
+                  let updateValueFilter = function() {
+                      return function () {
+                      filter['value'].push(arguments[0])
+                      }
+                  }
+
+                  let valueControl = new TomSelect("#select-value",{
+                      maxItems: null,
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: updateValueFilter()
+                  });
+
+                  let addValues = function() {
+                      return function () {
+                          // clear the current value options and add the selected attribute values
+                          // tom-select handles duplicates
+                          let selectedProperty = arguments[0];
+                          valueControl.clear();
+                          valueControl.clearOptions();
+                          filter['value'] = []
+                          if (filter['item'] === 'node') {
+                              for (let each in allNodes) {
+                                  valueControl.addOption({
+                                      id:allNodes[each][selectedProperty],
+                                      title:allNodes[each][selectedProperty]
+                                  })
+                              }
+                          }
+                          else if (filter['item'] === 'edge') {
+                              for (let each in allEdges) {
+                                  valueControl.addOption({
+                                      id:allEdges[each][selectedProperty],
+                                      title:allEdges[each][selectedProperty]
+                                  })
+                              }
+                          }
+                      }
+                  };
+
+                  let propControl = new TomSelect("#select-property",{
+                      valueField: 'id',
+                      labelField: 'title',
+                      searchField: 'title',
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addValues()
+                  });
+
+                  let addProperties = function() {
+                      return function () {
+                          // loops through the selected network item and adds the attributes to dropdown
+                          // tom-select handles duplicates
+                          clearFilter(false)
+                          if (arguments[0] === 'edge') {
+                              for (let each in allEdges) {
+                                  if (allEdges.hasOwnProperty(each)) {
+                                      for (let eachProp in allEdges[each]) {
+                                          if (allEdges[each].hasOwnProperty(eachProp)) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                          else if (arguments[0] === 'node') {
+                              for (let each in allNodes) {
+                                  if (allNodes.hasOwnProperty(each)) {
+                                      for (let eachProp in allNodes[each]) {
+                                          if (allNodes[each].hasOwnProperty(eachProp)
+                                              && (eachProp !== 'hidden' && eachProp !== 'savedLabel'
+                                                  && eachProp !== 'hiddenLabel')) {
+                                              propControl.addOption({id: eachProp, title: eachProp})
+
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  };
+
+                  let itemControl = new TomSelect("#select-item",{
+                      create: false,
+                      sortField:{
+                          field: "text",
+                          direction: "asc"
+                      },
+                      onItemAdd: addProperties()
+                  });
+
+                  function clearFilter(reset) {
+                      // utility function to clear all the selected filter options
+                      // if reset is set to true, the existing filter will be removed
+                      // else, only the dropdown options are cleared
+                      propControl.clear();
+                      propControl.clearOptions();
+                      valueControl.clear();
+                      valueControl.clearOptions();
+                      filter = {
+                          item : '',
+                          property : '',
+                          value : []
+                      }
+                      if (reset) {
+                          itemControl.clear();
+                          filterHighlight({nodes: []})
+                      }
+                  }
+
+                  function updateFilter(value, key) {
+                      // key could be 'item' or 'property' and value is as selected in dropdown
+                      filter[key] = value
+                  }
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 61, "id": "Banking", "label": "Banking", "shape": "dot", "size": 6.1000000000000005, "title": "Concept: \u0027Banking\u0027, Frequency: 61"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 796, "id": "Cryptocurrency", "label": "Cryptocurrency", "shape": "dot", "size": 79.60000000000001, "title": "Concept: \u0027Cryptocurrency\u0027, Frequency: 796"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 476, "id": "FinTech", "label": "FinTech", "shape": "dot", "size": 47.6, "title": "Concept: \u0027FinTech\u0027, Frequency: 476"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 500, "id": "Financial Services", "label": "Financial Services", "shape": "dot", "size": 50.0, "title": "Concept: \u0027Financial Services\u0027, Frequency: 500"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 1519, "id": "Blockchain", "label": "Blockchain", "shape": "dot", "size": 151.9, "title": "Concept: \u0027Blockchain\u0027, Frequency: 1519"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 187, "id": "Finance", "label": "Finance", "shape": "dot", "size": 18.7, "title": "Concept: \u0027Finance\u0027, Frequency: 187"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 60, "id": "Financial Exchanges", "label": "Financial Exchanges", "shape": "dot", "size": 6.0, "title": "Concept: \u0027Financial Exchanges\u0027, Frequency: 60"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 522, "id": "Bitcoin", "label": "Bitcoin", "shape": "dot", "size": 52.2, "title": "Concept: \u0027Bitcoin\u0027, Frequency: 522"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 164, "id": "Payments", "label": "Payments", "shape": "dot", "size": 16.400000000000002, "title": "Concept: \u0027Payments\u0027, Frequency: 164"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 98, "id": "Trading Platform", "label": "Trading Platform", "shape": "dot", "size": 9.8, "title": "Concept: \u0027Trading Platform\u0027, Frequency: 98"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 167, "id": "Internet", "label": "Internet", "shape": "dot", "size": 16.7, "title": "Concept: \u0027Internet\u0027, Frequency: 167"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 505, "id": "Information Technology", "label": "Information Technology", "shape": "dot", "size": 50.5, "title": "Concept: \u0027Information Technology\u0027, Frequency: 505"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 483, "id": "Software", "label": "Software", "shape": "dot", "size": 48.300000000000004, "title": "Concept: \u0027Software\u0027, Frequency: 483"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 99, "id": "E-Commerce", "label": "E-Commerce", "shape": "dot", "size": 9.9, "title": "Concept: \u0027E-Commerce\u0027, Frequency: 99"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 57, "id": "Information Services", "label": "Information Services", "shape": "dot", "size": 5.7, "title": "Concept: \u0027Information Services\u0027, Frequency: 57"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 45, "id": "Digital Marketing", "label": "Digital Marketing", "shape": "dot", "size": 4.5, "title": "Concept: \u0027Digital Marketing\u0027, Frequency: 45"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 40, "id": "Web Apps", "label": "Web Apps", "shape": "dot", "size": 4.0, "title": "Concept: \u0027Web Apps\u0027, Frequency: 40"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 63, "id": "Enterprise Software", "label": "Enterprise Software", "shape": "dot", "size": 6.300000000000001, "title": "Concept: \u0027Enterprise Software\u0027, Frequency: 63"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 70, "id": "Machine Learning", "label": "Machine Learning", "shape": "dot", "size": 7.0, "title": "Concept: \u0027Machine Learning\u0027, Frequency: 70"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 66, "id": "Mobile", "label": "Mobile", "shape": "dot", "size": 6.6000000000000005, "title": "Concept: \u0027Mobile\u0027, Frequency: 66"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 134, "id": "Web Development", "label": "Web Development", "shape": "dot", "size": 13.4, "title": "Concept: \u0027Web Development\u0027, Frequency: 134"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 101, "id": "Big Data", "label": "Big Data", "shape": "dot", "size": 10.100000000000001, "title": "Concept: \u0027Big Data\u0027, Frequency: 101"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 34, "id": "Supply Chain Management", "label": "Supply Chain Management", "shape": "dot", "size": 3.4000000000000004, "title": "Concept: \u0027Supply Chain Management\u0027, Frequency: 34"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 79, "id": "Apps", "label": "Apps", "shape": "dot", "size": 7.9, "title": "Concept: \u0027Apps\u0027, Frequency: 79"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 38, "id": "Marketing", "label": "Marketing", "shape": "dot", "size": 3.8000000000000003, "title": "Concept: \u0027Marketing\u0027, Frequency: 38"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 145, "id": "Artificial Intelligence", "label": "Artificial Intelligence", "shape": "dot", "size": 14.5, "title": "Concept: \u0027Artificial Intelligence\u0027, Frequency: 145"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 47, "id": "Analytics", "label": "Analytics", "shape": "dot", "size": 4.7, "title": "Concept: \u0027Analytics\u0027, Frequency: 47"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 35, "id": "Health Care", "label": "Health Care", "shape": "dot", "size": 3.5, "title": "Concept: \u0027Health Care\u0027, Frequency: 35"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 142, "id": "Consulting", "label": "Consulting", "shape": "dot", "size": 14.200000000000001, "title": "Concept: \u0027Consulting\u0027, Frequency: 142"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 51, "id": "Security", "label": "Security", "shape": "dot", "size": 5.1000000000000005, "title": "Concept: \u0027Security\u0027, Frequency: 51"}, {"borderWidthSelected": 5, "color": "rgb(0, 147, 146)", "font": {"color": "white"}, "frequency": 62, "id": "Ethereum", "label": "Ethereum", "shape": "dot", "size": 6.2, "title": "Concept: \u0027Ethereum\u0027, Frequency: 62"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 31, "id": "Augmented Reality", "label": "Augmented Reality", "shape": "dot", "size": 3.1, "title": "Concept: \u0027Augmented Reality\u0027, Frequency: 31"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 48, "id": "Cloud Computing", "label": "Cloud Computing", "shape": "dot", "size": 4.800000000000001, "title": "Concept: \u0027Cloud Computing\u0027, Frequency: 48"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 81, "id": "Cyber Security", "label": "Cyber Security", "shape": "dot", "size": 8.1, "title": "Concept: \u0027Cyber Security\u0027, Frequency: 81"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 111, "id": "Internet of Things", "label": "Internet of Things", "shape": "dot", "size": 11.100000000000001, "title": "Concept: \u0027Internet of Things\u0027, Frequency: 111"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 141, "id": "Mobile Apps", "label": "Mobile Apps", "shape": "dot", "size": 14.100000000000001, "title": "Concept: \u0027Mobile Apps\u0027, Frequency: 141"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 58, "id": "Venture Capital", "label": "Venture Capital", "shape": "dot", "size": 5.800000000000001, "title": "Concept: \u0027Venture Capital\u0027, Frequency: 58"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 57, "id": "SaaS", "label": "SaaS", "shape": "dot", "size": 5.7, "title": "Concept: \u0027SaaS\u0027, Frequency: 57"}, {"borderWidthSelected": 5, "color": "rgb(232, 132, 113)", "font": {"color": "white"}, "frequency": 57, "id": "Web Design", "label": "Web Design", "shape": "dot", "size": 5.7, "title": "Concept: \u0027Web Design\u0027, Frequency: 57"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 59, "id": "Virtual Currency", "label": "Virtual Currency", "shape": "dot", "size": 5.9, "title": "Concept: \u0027Virtual Currency\u0027, Frequency: 59"}, {"borderWidthSelected": 5, "color": "rgb(233, 226, 156)", "font": {"color": "white"}, "frequency": 52, "id": "Mobile Payments", "label": "Mobile Payments", "shape": "dot", "size": 5.2, "title": "Concept: \u0027Mobile Payments\u0027, Frequency: 52"}]);
+                  edges = new vis.DataSet([{"from": "Banking", "to": "Cryptocurrency", "value": 340, "width": 34}, {"from": "Banking", "to": "FinTech", "value": 300, "width": 30}, {"from": "Banking", "to": "Financial Services", "value": 420, "width": 42}, {"from": "Banking", "to": "Blockchain", "value": 360, "width": 36}, {"from": "Financial Services", "to": "Finance", "value": 900, "width": 90}, {"from": "Financial Services", "to": "Financial Exchanges", "value": 300, "width": 30}, {"from": "Financial Services", "to": "FinTech", "value": 2420, "width": 242}, {"from": "Financial Services", "to": "Bitcoin", "value": 1760, "width": 176}, {"from": "Financial Services", "to": "Payments", "value": 680, "width": 68}, {"from": "Financial Services", "to": "Trading Platform", "value": 500, "width": 50}, {"from": "Financial Services", "to": "Cryptocurrency", "value": 2700, "width": 270}, {"from": "Financial Services", "to": "Internet", "value": 300, "width": 30}, {"from": "Financial Services", "to": "Information Technology", "value": 770, "width": 77}, {"from": "Financial Services", "to": "Software", "value": 380, "width": 38}, {"from": "Financial Services", "to": "Blockchain", "value": 2520, "width": 252}, {"from": "E-Commerce", "to": "Cryptocurrency", "value": 350, "width": 35}, {"from": "E-Commerce", "to": "Bitcoin", "value": 300, "width": 30}, {"from": "E-Commerce", "to": "Blockchain", "value": 510, "width": 51}, {"from": "Payments", "to": "Blockchain", "value": 720, "width": 72}, {"from": "Payments", "to": "Bitcoin", "value": 730, "width": 73}, {"from": "Payments", "to": "FinTech", "value": 670, "width": 67}, {"from": "Payments", "to": "Cryptocurrency", "value": 770, "width": 77}, {"from": "Information Services", "to": "Information Technology", "value": 350, "width": 35}, {"from": "Information Services", "to": "Blockchain", "value": 410, "width": 41}, {"from": "Blockchain", "to": "Digital Marketing", "value": 390, "width": 39}, {"from": "Blockchain", "to": "Web Apps", "value": 380, "width": 38}, {"from": "Blockchain", "to": "Bitcoin", "value": 1460, "width": 146}, {"from": "Blockchain", "to": "Enterprise Software", "value": 580, "width": 58}, {"from": "Blockchain", "to": "Machine Learning", "value": 650, "width": 65}, {"from": "Blockchain", "to": "Mobile", "value": 470, "width": 47}, {"from": "Blockchain", "to": "Web Development", "value": 1220, "width": 122}, {"from": "Blockchain", "to": "FinTech", "value": 2920, "width": 292}, {"from": "Blockchain", "to": "Big Data", "value": 870, "width": 87}, {"from": "Blockchain", "to": "Cryptocurrency", "value": 3530, "width": 353}, {"from": "Blockchain", "to": "Supply Chain Management", "value": 330, "width": 33}, {"from": "Blockchain", "to": "Trading Platform", "value": 360, "width": 36}, {"from": "Blockchain", "to": "Apps", "value": 520, "width": 52}, {"from": "Blockchain", "to": "Marketing", "value": 360, "width": 36}, {"from": "Blockchain", "to": "Artificial Intelligence", "value": 1340, "width": 134}, {"from": "Blockchain", "to": "Finance", "value": 880, "width": 88}, {"from": "Blockchain", "to": "Analytics", "value": 370, "width": 37}, {"from": "Blockchain", "to": "Information Technology", "value": 4230, "width": 423}, {"from": "Blockchain", "to": "Health Care", "value": 330, "width": 33}, {"from": "Blockchain", "to": "Consulting", "value": 1140, "width": 114}, {"from": "Blockchain", "to": "Security", "value": 350, "width": 35}, {"from": "Blockchain", "to": "Ethereum", "value": 510, "width": 51}, {"from": "Blockchain", "to": "Augmented Reality", "value": 300, "width": 30}, {"from": "Blockchain", "to": "Cloud Computing", "value": 450, "width": 45}, {"from": "Blockchain", "to": "Cyber Security", "value": 690, "width": 69}, {"from": "Blockchain", "to": "Internet of Things", "value": 1020, "width": 102}, {"from": "Blockchain", "to": "Mobile Apps", "value": 1270, "width": 127}, {"from": "Blockchain", "to": "Venture Capital", "value": 420, "width": 42}, {"from": "Blockchain", "to": "Internet", "value": 1230, "width": 123}, {"from": "Blockchain", "to": "SaaS", "value": 440, "width": 44}, {"from": "Blockchain", "to": "Web Design", "value": 510, "width": 51}, {"from": "Blockchain", "to": "Software", "value": 4110, "width": 411}, {"from": "Ethereum", "to": "Cryptocurrency", "value": 310, "width": 31}, {"from": "FinTech", "to": "Trading Platform", "value": 440, "width": 44}, {"from": "FinTech", "to": "Software", "value": 600, "width": 60}, {"from": "FinTech", "to": "Finance", "value": 800, "width": 80}, {"from": "FinTech", "to": "Bitcoin", "value": 1610, "width": 161}, {"from": "FinTech", "to": "Cryptocurrency", "value": 2390, "width": 239}, {"from": "FinTech", "to": "Information Technology", "value": 690, "width": 69}, {"from": "FinTech", "to": "Internet", "value": 300, "width": 30}, {"from": "Web Design", "to": "Web Development", "value": 380, "width": 38}, {"from": "Web Design", "to": "Software", "value": 330, "width": 33}, {"from": "Bitcoin", "to": "Information Technology", "value": 590, "width": 59}, {"from": "Bitcoin", "to": "Financial Exchanges", "value": 310, "width": 31}, {"from": "Bitcoin", "to": "Finance", "value": 770, "width": 77}, {"from": "Bitcoin", "to": "Virtual Currency", "value": 430, "width": 43}, {"from": "Bitcoin", "to": "Software", "value": 410, "width": 41}, {"from": "Bitcoin", "to": "Cryptocurrency", "value": 2040, "width": 204}, {"from": "Bitcoin", "to": "Internet", "value": 340, "width": 34}, {"from": "Cyber Security", "to": "Information Technology", "value": 340, "width": 34}, {"from": "Finance", "to": "Cryptocurrency", "value": 820, "width": 82}, {"from": "Machine Learning", "to": "Artificial Intelligence", "value": 520, "width": 52}, {"from": "Big Data", "to": "Software", "value": 310, "width": 31}, {"from": "Big Data", "to": "Artificial Intelligence", "value": 330, "width": 33}, {"from": "Mobile Apps", "to": "Web Development", "value": 600, "width": 60}, {"from": "Mobile Apps", "to": "Information Technology", "value": 510, "width": 51}, {"from": "Mobile Apps", "to": "Software", "value": 740, "width": 74}, {"from": "Financial Exchanges", "to": "Cryptocurrency", "value": 460, "width": 46}, {"from": "Internet", "to": "Cryptocurrency", "value": 610, "width": 61}, {"from": "Internet", "to": "Software", "value": 400, "width": 40}, {"from": "Internet", "to": "Information Technology", "value": 560, "width": 56}, {"from": "Mobile Payments", "to": "Cryptocurrency", "value": 300, "width": 30}, {"from": "Software", "to": "Artificial Intelligence", "value": 500, "width": 50}, {"from": "Software", "to": "Information Technology", "value": 1890, "width": 189}, {"from": "Software", "to": "Enterprise Software", "value": 300, "width": 30}, {"from": "Software", "to": "Consulting", "value": 370, "width": 37}, {"from": "Software", "to": "Internet of Things", "value": 470, "width": 47}, {"from": "Software", "to": "Cryptocurrency", "value": 1050, "width": 105}, {"from": "Software", "to": "Web Development", "value": 840, "width": 84}, {"from": "Information Technology", "to": "Internet of Things", "value": 300, "width": 30}, {"from": "Information Technology", "to": "Web Development", "value": 540, "width": 54}, {"from": "Information Technology", "to": "Artificial Intelligence", "value": 470, "width": 47}, {"from": "Information Technology", "to": "Cryptocurrency", "value": 1310, "width": 131}, {"from": "Information Technology", "to": "Consulting", "value": 550, "width": 55}, {"from": "Artificial Intelligence", "to": "Internet of Things", "value": 300, "width": 30}, {"from": "Consulting", "to": "Cryptocurrency", "value": 310, "width": 31}, {"from": "Cryptocurrency", "to": "Apps", "value": 300, "width": 30}, {"from": "Cryptocurrency", "to": "Trading Platform", "value": 740, "width": 74}, {"from": "Cryptocurrency", "to": "Virtual Currency", "value": 300, "width": 30}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.3,
+            "damping": 0.09,
+            "gravitationalConstant": -80000,
+            "springConstant": 0.001,
+            "springLength": 250
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
